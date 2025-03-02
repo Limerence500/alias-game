@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alias ойыны</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .word-box { font-size: 24px; padding: 20px; background: #007bff; color: white; border-radius: 10px; margin: 20px auto; display: inline-block; }
+        .timer { font-size: 20px; color: red; }
+        .buttons { margin-top: 20px; }
+        button { padding: 10px 20px; font-size: 18px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Alias ойыны</h1>
+    <h2 id="team-title">1-Топ</h2>
+    <div class="word-box" id="word">Бастау</div>
+    <p class="timer">Қалған уақыт: <span id="time">60</span> сек</p>
+    <div class="buttons">
+        <button onclick="startWord()">Сөзді бастау</button>
+        <button onclick="updateScore(1)" disabled>✅ +1</button>
+        <button onclick="updateScore(-1)" disabled>❌ -1</button>
+    </div>
+    <p>1-Топ: <span id="score1">0</span> | 2-Топ: <span id="score2">0</span></p>
+
+    <script>
+        const words = ["Білім", "Жүйе", "Аралық бақылау", "Мектеп", "Грант", "Шәкіртақы", "Тәжірибе",
+            "Жаһандану", "Кесте", "Сала", "Цифрландыру", "Бәсекелестік", "Дағдылар",
+            "Бағдарлама", "Дәріс", "Даму", "Зерттеу", "Тәрбиелеу", "Сапа", "Пән"];
+        words.sort(() => Math.random() - 0.5);
+        
+        let team1Words = words.slice(0, 10);
+        let team2Words = words.slice(10);
+        let team = 1, index = 0, score1 = 0, score2 = 0, time = 60, timer;
+        let wordStarted = false;
+        
+        function startWord() {
+            if (wordStarted) return;
+            document.querySelector("button[onclick='updateScore(1)']").disabled = false;
+            document.querySelector("button[onclick='updateScore(-1)']").disabled = false;
+            wordStarted = true;
+            document.getElementById("word").innerText = team === 1 ? team1Words[index] : team2Words[index];
+            time = 60;
+            document.getElementById("time").innerText = time;
+            timer = setInterval(() => {
+                time--;
+                document.getElementById("time").innerText = time;
+                if (time <= 0) {
+                    clearInterval(timer);
+                    wordStarted = false;
+                    nextWord();
+                }
+            }, 1000);
+        }
+        
+        function updateScore(points) {
+            if (!wordStarted) return;
+            wordStarted = false;
+            clearInterval(timer);
+            if (team === 1) score1 += points; else score2 += points;
+            document.getElementById("score1").innerText = score1;
+            document.getElementById("score2").innerText = score2;
+            nextWord();
+        }
+        
+        function nextWord() {
+            document.querySelector("button[onclick='updateScore(1)']").disabled = true;
+            document.querySelector("button[onclick='updateScore(-1)']").disabled = true;
+            index++;
+            if ((team === 1 && index >= team1Words.length) || (team === 2 && index >= team2Words.length)) {
+                if (team === 1) {
+                    team = 2;
+                    index = 0;
+                    document.getElementById("team-title").innerText = "2-Топ дайынсыз ба?";
+                } else {
+                    document.body.innerHTML = `<h1>Ойын аяқталды!</h1>
+                        <p>${score1 > score2 ? "1-Топ жеңді!" : score1 < score2 ? "2-Топ жеңді!" : "Тең!"}</p>
+                        <button onclick='location.reload()'>Қайта бастау</button>`;
+                }
+            } else {
+                document.getElementById("team-title").innerText = team + "-Топ";
+                document.getElementById("word").innerText = "Келесі сөзді бастау үшін батырманы басыңыз";
+            }
+        }
+    </script>
+</body>
+</html>
